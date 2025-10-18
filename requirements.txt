@@ -1,41 +1,60 @@
 # Core dependencies for Module 1: AI Agents Course
-# Останні доступні версії станом на жовтень 2024
+# Перевірені робочі версії для Python 3.12
+# Оновлено: Жовтень 2024
 
-# LangChain ecosystem - актуальні версії
-langchain>=1.0.0
-langchain-openai>=1.0.0
-langchain-community>=0.3.0  # Остання версія 0.3.x
-langchain-core>=1.0.0
-langchain-text-splitters>=1.0.0
+# ===========================
+# LangChain екосистема - РОБОЧІ версії
+# ===========================
+langchain==1.0.0
+langchain-openai==1.0.0
+langchain-core==1.0.0
+langchain-community==0.3.31  # Остання доступна версія (немає 1.0)
+langchain-text-splitters==1.0.0
+langsmith==0.4.37  # Для моніторингу
 
-# CrewAI for multi-agent systems
-crewai>=0.80.0
-crewai-tools>=0.14.0
+# ===========================
+# Multi-agent frameworks - РОБОЧІ версії
+# ===========================
+crewai==0.203.1
+crewai-tools==0.14.0
+smolagents==1.22.0
 
-# SmolAgents from HuggingFace
-smolagents>=1.0.0
+# ===========================
+# LLM providers - РОБОЧІ версії
+# ===========================
+openai==1.109.1
 
-# LLM providers
-openai>=1.50.0
-anthropic>=0.34.0
-
+# ===========================
 # Search and tools
-duckduckgo-search>=6.3.0
-requests>=2.32.0
-beautifulsoup4>=4.12.0
+# ===========================
+# duckduckgo-search==6.3.0  # Застаріло, використовуйте ddgs
+ddgs>=1.0.0  # Нова версія для пошуку DuckDuckGo
 
+# ===========================
 # Data processing
+# ===========================
 pandas>=2.2.0
 numpy>=1.26.0
 
-# Environment management
-python-dotenv>=1.0.0
-
-# Additional utilities
+# ===========================
+# Utilities
+# ===========================
+python-dotenv==1.0.1
+requests>=2.32.0
+beautifulsoup4>=4.12.0
 tenacity>=9.0.0
 tqdm>=4.66.0
-loguru>=0.7.0
-rich>=13.8.0
 
-# For LangChain monitoring
-langsmith>=0.4.0
+# ===========================
+# Optional - для покращеного досвіду
+# ===========================
+loguru>=0.7.0  # Кращий logging
+rich>=13.8.0  # Красивий вивід в терміналі
+
+# ===========================
+# Додаткові пакети для повної функціональності
+# ===========================
+pydantic>=2.0.0  # Для валідації даних
+aiohttp>=3.8.0  # Для асинхронних запитів
+SQLAlchemy>=2.0.0  # Для роботи з БД
+PyYAML>=6.0  # Для конфігурації
