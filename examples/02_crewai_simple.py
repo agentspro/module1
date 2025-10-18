@@ -111,7 +111,7 @@ class SimpleCrewAIAgent:
     
     def research(self, topic: str) -> Dict[str, Any]:
         """Провести дослідження"""
-        print(f"\n🚀 CrewAI: Досліджуємо '{topic}'")
+        print(f"\nCrewAI: Досліджуємо '{topic}'")
         print("=" * 60)
         
         # Створюємо задачу
@@ -228,7 +228,7 @@ class MultiAgentTeam:
     
     def research_together(self, topic: str) -> Dict:
         """Командна робота над дослідженням"""
-        print(f"\n👥 Мультиагентна команда: '{topic}'")
+        print(f"\nМультиагентна команда: '{topic}'")
         print("=" * 60)
         
         # Задача 1: Пошук
@@ -276,38 +276,38 @@ def main():
     """Демонстрація CrewAI без LangChain"""
     
     print("""
-    ╔══════════════════════════════════════════════════════════════╗
-    ║               CREWAI AGENT (БЕЗ LANGCHAIN)                   ║
-    ╚══════════════════════════════════════════════════════════════╝
+    ============================================================
+               CREWAI AGENT (БЕЗ LANGCHAIN)                   
+    ============================================================
     """)
     
     # Перевірка API ключа
     api_key = os.getenv("OPENAI_API_KEY")
     if api_key:
-        print(f"✅ API ключ знайдено")
+        print(f"[OK] API ключ знайдено")
     else:
-        print("⚠️ Додайте OPENAI_API_KEY в .env файл")
+        print("[WARNING] Додайте OPENAI_API_KEY в .env файл")
         print("   CrewAI спробує працювати в обмеженому режимі")
     
     # 1. Простий агент
-    print("\n1️⃣ ОДИН АГЕНТ:")
+    print("\n1. ОДИН АГЕНТ:")
     agent = SimpleCrewAIAgent()
     result = agent.research("AI асистенти для студентів")
     
     if result["success"]:
-        print(f"✅ Дослідження завершено")
-        print(f"📝 Результат: {result['result'][:300]}...")
+        print(f"[OK] Дослідження завершено")
+        print(f"Результат: {result['result'][:300]}...")
     else:
-        print(f"❌ Помилка: {result.get('error')}")
+        print(f"[ERROR] Помилка: {result.get('error')}")
     
     # 2. Команда агентів (демо)
-    print("\n2️⃣ КОМАНДА АГЕНТІВ:")
+    print("\n2. КОМАНДА АГЕНТІВ:")
     team = MultiAgentTeam()
     team_result = team.research_together("Майбутнє онлайн освіти")
-    print(f"✅ Команда з {team_result['agents_used']} агентів завершила роботу")
+    print(f"[OK] Команда з {team_result['agents_used']} агентів завершила роботу")
     
     print("\n" + "=" * 60)
-    print("💡 Підказки:")
+    print("Підказки:")
     print("- Перегляньте crewai_report_*.json для повних результатів")
     print("- Додайте OPENAI_API_KEY для повного функціоналу")
     print("- Спробуйте змінити ролі та завдання агентів")
@@ -316,8 +316,8 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n👋 До побачення!")
+        print("\nДо побачення!")
     except Exception as e:
-        print(f"\n❌ Помилка: {e}")
-        print("\n📦 Встановіть залежності:")
+        print(f"\n[ERROR] Помилка: {e}")
+        print("\nВстановіть залежності:")
         print("pip install crewai crewai-tools duckduckgo-search")
