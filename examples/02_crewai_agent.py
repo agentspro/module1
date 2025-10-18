@@ -3,10 +3,8 @@ CrewAI Multi-Agent System
 Демонстрація роботи команди агентів
 """
 
-import os
 import json
 from datetime import datetime
-from typing import Dict, List
 from crewai import Agent, Task, Crew, Process
 from crewai.tools import tool
 
@@ -22,7 +20,7 @@ load_dotenv()
 def search_web(query: str) -> str:
     """Пошук інформації в інтернеті через DuckDuckGo"""
     try:
-        from duckduckgo_search import DDGS
+        from ddgs import DDGS
         
         results = []
         with DDGS() as ddgs:
