@@ -89,74 +89,203 @@ class SimpleAgent:
         # Головна логіка
 ```
 
+## 🔧 Як працюють агенти
+
+Всі агенти реалізують один патерн дослідження з чотирма кроками:
+
+1. **Web Search** - пошук інформації через DuckDuckGo (або demo fallback)
+2. **Data Analysis** - аналіз тональності та статистика тексту
+3. **AI Processing** - генерація звіту через LLM (або demo аналіз)
+4. **Memory/Storage** - збереження результатів у JSON файли
+
+### Архітектура LangChain 1.0
+
+**Ключові концепції**: LCEL (LangChain Expression Language), chains, промпти
+
+```python
+# Структура
+class LangChain1Agent:
+    def __init__(self):
+        self.llm = ChatOpenAI(model="gpt-4")
+        self.tools = {
+            "search_web": function,
+            "analyze_data": function,
+            "save_to_memory": function
+        }
+        self.chains = {
+            "research": prompt | llm | output_parser,
+            "conclusion": prompt | llm | output_parser
+        }
+
+    def research(self, topic: str):
+        # 1. Виконати інструменти
+        search_results = self.tools["search_web"](topic)
+        analysis = self.tools["analyze_data"](search_results)
+
+        # 2. Запустити AI через chains
+        ai_analysis = self.chains["research"].invoke({
+            "topic": topic,
+            "data": search_results
+        })
+
+        # 3. Зберегти в пам'ять
+        self.tools["save_to_memory"](results)
+```
+
+**Виходи**: `langchain1_report.json`, `langchain1_memory.json`
+
+**Pipeline**: Tools → LCEL Chains → JSON Output
+
+---
+
+### Архітектура CrewAI
+
+**Ключові концепції**: Agents з ролями, Tasks з контекстом, Crew з Process
+
+#### Простий агент (02_crewai_simple.py)
+
+```python
+# Інструменти через декоратор
+@tool("Web Search")
+def search_web(query: str) -> str:
+    """Пошук інформації"""
+    return results
+
+# Агент з роллю
+agent = Agent(
+    role='Дослідник AI',
+    goal='Зібрати інформацію',
+    backstory='Експерт з AI',
+    tools=[search_web, analyze_data],
+    verbose=True,
+    max_iter=5
+)
+
+# Задача
+task = Task(
+    description="Дослідіть тему: {topic}",
+    expected_output="Структурований звіт",
+    agent=agent
+)
+
+# Запуск
+crew = Crew(agents=[agent], tasks=[task])
+result = crew.kickoff()
+```
+
+#### Мультиагентна система (02_crewai_agent.py)
+
+```python
+# Три агенти з різними ролями
+researcher = Agent(role='Дослідник', tools=[search_web])
+analyst = Agent(role='Аналітик', tools=[analyze_data])
+reporter = Agent(role='Репортер', tools=[generate_report])
+
+# Задачі з залежностями через context
+task1 = Task(description="Пошук", agent=researcher)
+task2 = Task(description="Аналіз", agent=analyst, context=[task1])
+task3 = Task(description="Звіт", agent=reporter, context=[task1, task2])
+
+# Послідовне виконання
+crew = Crew(
+    agents=[researcher, analyst, reporter],
+    tasks=[task1, task2, task3],
+    process=Process.sequential,  # або Process.hierarchical
+    memory=True,
+    cache=True
+)
+```
+
+**Виходи**: `crewai_report_*.json`, `crewai_final_*.json`, `*.md` звіти
+
+**Pipeline**: Agents → Tasks (sequential) → Context Sharing → JSON Output
+
+---
+
+### Архітектура SmolAgents
+
+**Ключові концепції**: CodeAgent генерує Python код, мінімалістичний підхід
+
+```python
+# Інструменти з docstrings
+@tool
+def search_web(query: str) -> str:
+    """
+    Пошук інформації в інтернеті.
+
+    Args:
+        query: Пошуковий запит
+
+    Returns:
+        Результати пошуку
+    """
+    return results
+
+# Агент з моделлю
+agent = CodeAgent(
+    tools=[search_web, analyze_sentiment, save_memory],
+    model=OpenAIServerModel(model_id="gpt-4"),
+    max_steps=5,
+    verbose=True
+)
+
+# Задача як промпт
+task = """
+Проведіть дослідження:
+1. Знайдіть інформацію
+2. Проаналізуйте тональність
+3. Збережіть в пам'ять
+"""
+
+# Агент генерує Python код для виконання
+result = agent.run(task)
+```
+
+**Виходи**: `smolagents_memory.json`
+
+**Pipeline**: Task Description → Code Generation → Tool Execution → Results
+
+---
+
+## 📊 Порівняння фреймворків
+
+| Характеристика | LangChain | CrewAI | SmolAgents |
+|----------------|-----------|---------|------------|
+| **Підхід** | Chains & Pipelines | Multi-Agent Teams | Code Generation |
+| **Складність** | Середня | Висока | Низька |
+| **Інструменти** | Функції в dict | @tool декоратор | @tool з docstrings |
+| **Паралелізм** | Через LCEL | Process.sequential/hierarchical | Послідовно |
+| **Контекст** | Через chains | context між tasks | Через generated code |
+| **LLM підтримка** | OpenAI, Anthropic | OpenAI | OpenAI, HF, Local |
+| **Use case** | Pipelines, RAG | Командна робота | Швидкі прототипи |
+
+---
+
 ## 📝 Приклади використання
 
 ### LangChain Agent
-```python
-# 01_langchain_v1.py - 349 рядків
-from examples.langchain_v1 import LangChain1Agent
-
-agent = LangChain1Agent()
-result = agent.research("AI в освіті")
-# Використовує LCEL chains, промпти, tools
-# Виходи: langchain1_report.json, langchain1_memory.json
+```bash
+python3 examples/01_langchain_v1.py
 ```
+Демонструє LCEL chains та pipeline pattern для дослідження.
 
-### CrewAI Agent (простий)
-```python
-# 02_crewai_simple.py - 323 рядки
-from examples.crewai_simple import SimpleCrewAIAgent
-
-agent = SimpleCrewAIAgent()
-result = agent.research("AI асистенти для студентів")
-# Один агент з декількома інструментами
+### CrewAI Simple Agent
+```bash
+python3 examples/02_crewai_simple.py
 ```
+Один агент з кількома інструментами та Task.
 
-### CrewAI Multi-Agent System
-```python
-# 02_crewai_agent.py - 294 рядки
-from examples.crewai_agent import create_research_team, create_research_tasks
-
-researcher, analyst, reporter = create_research_team()
-# Команда з 3 агентів: дослідник, аналітик, репортер
-# Послідовне виконання задач з контекстом
+### CrewAI Multi-Agent
+```bash
+python3 examples/02_crewai_agent.py
 ```
+Команда з 3 агентів (researcher → analyst → reporter) з context sharing.
 
 ### SmolAgents
-```python
-# 03_smolagents_agent.py - 267 рядків
-from examples.smolagents_agent import SmolAgentsResearchAgent
-
-agent = SmolAgentsResearchAgent(model_type="openai")
-result = agent.research("Штучний інтелект в освіті 2025")
-# CodeAgent генерує Python код для вирішення задач
+```bash
+python3 examples/03_smolagents_agent.py
 ```
-
-## 🎓 Навчальний план
-
-### Тиждень 1: LangChain Basics
-1. Запустіть `01_langchain_v1.py` і зрозумійте структуру
-2. Вивчіть як працюють LCEL chains (research_chain, conclusion_chain)
-3. Додайте новий інструмент до `_create_tools()`
-4. Змініть промпти в `_create_chains()`
-
-### Тиждень 2: CrewAI Simple Agent
-1. Запустіть `02_crewai_simple.py`
-2. Зрозумійте структуру Agent (role, goal, backstory)
-3. Створіть власний @tool декоратор
-4. Експериментуйте з Task description
-
-### Тиждень 3: CrewAI Multi-Agent
-1. Запустіть `02_crewai_agent.py`
-2. Вивчіть як агенти співпрацюють через context
-3. Додайте 4-го агента до команди
-4. Спробуйте Process.hierarchical замість sequential
-
-### Тиждень 4: SmolAgents
-1. Запустіть `03_smolagents_agent.py`
-2. Зрозумійте як CodeAgent генерує код
-3. Додайте новий tool з proper docstring
-4. Спробуйте локальну модель (model_type="local")
+CodeAgent генерує Python код для виконання дослідження.
 
 ## 🛠 Версії та сумісність
 
@@ -173,12 +302,6 @@ result = agent.research("Штучний інтелект в освіті 2025")
 ### Який файл запускати першим?
 Спочатку запустіть `test_agents.py` або `bash quick_start.sh` для автоматичного тестування всіх агентів. Потім вивчайте файли в порядку: `01_langchain_v1.py` → `02_crewai_simple.py` → `02_crewai_agent.py` → `03_smolagents_agent.py`
 
-### Чи потрібен API ключ?
-Ні, агенти працюють в демо режимі без ключа
-
-### Скільки коштує API?
-GPT-4: ~$0.03 за запит
-GPT-3.5: ~$0.002 за запит
 
 ### Де взяти API ключ?
 https://platform.openai.com/api-keys
@@ -197,20 +320,6 @@ https://platform.openai.com/api-keys
 2. Перевірте API ключ: `echo $OPENAI_API_KEY`
 3. Створіть Issue на GitHub
 
-## 📈 Прогрес навчання
-
-- [ ] Запустив `test_agents.py` та побачив як працюють всі агенти
-- [ ] Вивчив LangChain agent та зрозумів LCEL chains
-- [ ] Запустив CrewAI simple та розібрав @tool декоратор
-- [ ] Запустив CrewAI multi-agent та зрозумів як агенти співпрацюють
-- [ ] Запустив SmolAgents та побачив CodeAgent в дії
-- [ ] Додав власний інструмент до одного з фреймворків
-- [ ] Створив власного агента на основі прикладів
 
 ---
-
-**Версія курсу**: 2.2.0
-**Оновлено**: Жовтень 2024
-**Автор**: AI Agents Course
-
-💡 **Підказка**: Вивчайте фреймворки послідовно та порівнюйте їх підходи до вирішення однієї задачі!
+**Оновлено**: Жовтень 2025
