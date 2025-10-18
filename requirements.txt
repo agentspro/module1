@@ -1,38 +1,38 @@
 # Core dependencies for Module 1: AI Agents Course
-# Оновлено для сумісності з Python 3.12
+# Оновлено для сумісності
 
-# LangChain ecosystem - фіксовані версії для стабільності
+# LangChain ecosystem - сумісні версії
 langchain==0.2.16
 langchain-openai==0.1.25
 langchain-community==0.2.17
 langchain-core==0.2.41
 
 # CrewAI for multi-agent systems
-crewai==0.80.0
-crewai-tools==0.14.0
+crewai>=0.80.0
+crewai-tools>=0.14.0
 
 # SmolAgents from HuggingFace
 smolagents>=0.1.0
 
 # LLM providers
-openai==1.50.0
+openai>=1.50.0
 
 # Search and tools
-duckduckgo-search==6.3.0
-requests==2.32.3
-beautifulsoup4==4.12.3
+duckduckgo-search>=6.3.0
+requests>=2.32.0
+beautifulsoup4>=4.12.0
 
 # Data processing
-pandas==2.2.3
-numpy==1.26.4
+pandas>=2.2.0
+numpy>=1.26.0
 
 # Environment management
-python-dotenv==1.0.1
+python-dotenv>=1.0.0
 
-# Additional utilities
-tenacity==9.0.0  # Retry logic
-tqdm==4.66.5  # Progress bars
+# Additional utilities - ВИПРАВЛЕНО КОНФЛІКТ
+tenacity>=8.1.0,<9.0.0  # Сумісна з langchain 0.2.16
+tqdm>=4.66.0
 
-# Optional for better logging
-loguru==0.7.2  # Better logging
-rich==13.8.1  # Rich terminal output
+# Optional for better experience
+loguru>=0.7.0
+rich>=13.8.0
