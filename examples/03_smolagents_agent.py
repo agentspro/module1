@@ -42,19 +42,13 @@ class SmolAgentsResearchAgent:
                 model_id="gpt-4",
                 api_key=api_key or os.getenv("OPENAI_API_KEY")
             )
-        elif model_type == "hf":
+        else model_type == "hf":
             # Використання моделі з Hugging Face Hub
             return HfApiModel(
                 model_id="meta-llama/Llama-3.3-70B-Instruct",
                 token=os.getenv("HF_TOKEN")
             )
-        else:
-            # Локальна модель (наприклад, через LM Studio)
-            return OpenAIServerModel(
-                model_id="local-model",
-                api_base="http://localhost:1234/v1",
-                api_key="not-needed"
-            )
+
     
     def _create_tools(self) -> List:
         """Створення набору інструментів для дослідження"""
