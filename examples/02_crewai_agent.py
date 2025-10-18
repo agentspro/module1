@@ -1,5 +1,5 @@
 """
-CrewAI Multi-Agent System - БЕЗ LangChain
+CrewAI Multi-Agent System
 Демонстрація роботи команди агентів
 """
 

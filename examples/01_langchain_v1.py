@@ -13,19 +13,18 @@ from typing import Dict, List, Any
 try:
     from dotenv import load_dotenv
     load_dotenv()
-    print("✅ .env файл завантажено")
+    print(".env файл завантажено")
 except:
-    print("⚠️ python-dotenv не встановлено")
+    print("python-dotenv не встановлено")
 
 # Імпорти для LangChain 1.0
 try:
     from langchain_openai import ChatOpenAI
-    from langchain_core.messages import HumanMessage, SystemMessage
     from langchain_core.output_parsers import StrOutputParser
     from langchain_core.prompts import ChatPromptTemplate
-    print("✅ LangChain 1.0 компоненти завантажено")
+    print("LangChain 1.0 компоненти завантажено")
 except ImportError as e:
-    print(f"❌ Помилка імпорту LangChain: {e}")
+    print(f"Помилка імпорту LangChain: {e}")
     print("Встановіть: pip install langchain-openai langchain-core")
     sys.exit(1)
 
@@ -44,7 +43,7 @@ class LangChain1Agent:
         self.api_key = api_key or os.getenv("OPENAI_API_KEY")
         
         if not self.api_key:
-            print("⚠️ OPENAI_API_KEY не знайдено!")
+            print("OPENAI_API_KEY не знайдено!")
             self.llm = None
         else:
             try:
@@ -54,9 +53,9 @@ class LangChain1Agent:
                     temperature=0.7,
                     api_key=self.api_key
                 )
-                print(f"✅ ChatOpenAI LLM створено")
+                print(f" ChatOpenAI LLM створено")
             except Exception as e:
-                print(f"❌ Помилка створення LLM: {e}")
+                print(f" Помилка створення LLM: {e}")
                 self.llm = None
         
         # Створення інструментів
@@ -71,7 +70,7 @@ class LangChain1Agent:
         def search_web(query: str) -> str:
             """Пошук інформації в інтернеті"""
             try:
-                from duckduckgo_search import DDGS
+                from ddgs import DDGS
                 with DDGS() as ddgs:
                     results = list(ddgs.text(query, max_results=3))
                     if results:
@@ -79,14 +78,14 @@ class LangChain1Agent:
                         for i, r in enumerate(results, 1):
                             output += f"{i}. {r.get('title', '')}\n"
                             output += f"   {r.get('body', '')[:200]}...\n"
-                            output += f"   🔗 {r.get('href', '')}\n\n"
+                            output += f"   {r.get('href', '')}\n\n"
                         return output
             except Exception as e:
-                print(f"⚠️ Помилка пошуку: {e}")
+                print(f" Помилка пошуку: {e}")
             
             # Демо результат
             return f"""
-🔍 Демо результати для '{query}':
+Демо результати для '{query}':
 
 1. AI трансформує освіту через персоналізацію
    Штучний інтелект дозволяє створювати індивідуальні навчальні траєкторії...
@@ -113,7 +112,7 @@ class LangChain1Agent:
             sentiment = "позитивний" if pos_count > neg_count else "негативний" if neg_count > pos_count else "нейтральний"
             
             return f"""
-📊 Аналіз даних:
+Аналіз даних:
 - Слів: {word_count}
 - Речень: {sentences}
 - Тональність: {sentiment}
@@ -135,7 +134,7 @@ class LangChain1Agent:
             with open(filename, 'w', encoding='utf-8') as f:
                 json.dump(memory, f, ensure_ascii=False, indent=2)
             
-            return f"✅ Збережено в {filename}"
+            return f"Збережено в {filename}"
         
         return {
             "search_web": search_web,
@@ -174,45 +173,45 @@ class LangChain1Agent:
     
     def research(self, topic: str) -> dict:
         """Синхронне дослідження"""
-        print(f"\n🚀 LangChain 1.0 Agent: Дослідження '{topic}'")
+        print(f"\nLangChain 1.0 Agent: Дослідження '{topic}'")
         print("=" * 60)
         
         results = {"topic": topic, "timestamp": datetime.now().isoformat()}
         
         # Крок 1: Пошук
-        print("📍 Крок 1: Пошук інформації...")
+        print("Крок 1: Пошук інформації...")
         search_results = self.tools["search_web"](topic)
         results["search"] = search_results
-        print("   ✓ Завершено")
+        print("   Завершено")
         
         # Крок 2: Аналіз
-        print("📍 Крок 2: Аналіз даних...")
+        print("Крок 2: Аналіз даних...")
         analysis = self.tools["analyze_data"](search_results)
         results["analysis"] = analysis
-        print("   ✓ Завершено")
+        print("   Завершено")
         
         # Крок 3: AI обробка (якщо доступна)
         if self.llm and "research" in self.chains:
-            print("📍 Крок 3: AI аналіз...")
+            print("Крок 3: AI аналіз...")
             try:
                 ai_analysis = self.chains["research"].invoke({
                     "topic": topic,
                     "data": search_results
                 })
                 results["ai_analysis"] = ai_analysis
-                print("   ✓ Завершено")
+                print("   Завершено")
             except Exception as e:
-                print(f"   ⚠️ Помилка AI: {e}")
+                print(f"   Помилка AI: {e}")
                 results["ai_analysis"] = "AI аналіз недоступний"
         else:
-            print("📍 Крок 3: Демо аналіз...")
+            print(" Крок 3: Демо аналіз...")
             results["ai_analysis"] = self._demo_analysis(topic)
-            print("   ✓ Завершено")
+            print("   Завершено")
         
         # Крок 4: Збереження
-        print("📍 Крок 4: Збереження результатів...")
+        print(" Крок 4: Збереження результатів...")
         save_result = self.tools["save_to_memory"](results)
-        print(f"   ✓ {save_result}")
+        print(f"   {save_result}")
         
         # Створення звіту
         report = self._create_report(results)
@@ -222,14 +221,14 @@ class LangChain1Agent:
         with open("langchain1_report.json", "w", encoding="utf-8") as f:
             json.dump(results, f, ensure_ascii=False, indent=2)
         
-        print("\n💾 Повний звіт: langchain1_report.json")
+        print("\nПовний звіт: langchain1_report.json")
         
         return results
     
     def _demo_analysis(self, topic: str) -> str:
         """Демо аналіз для випадків без API"""
         return f"""
-📝 Аналіз теми '{topic}':
+Аналіз теми '{topic}':
 
 **Основні тренди:**
 • Персоналізація навчання через AI
@@ -254,31 +253,31 @@ class LangChain1Agent:
         """Створення фінального звіту"""
         return f"""
 ╔══════════════════════════════════════════════════════════════╗
-║              LANGCHAIN 1.0 RESEARCH REPORT                    ║
+║              LANGCHAIN 1.0 RESEARCH REPORT                   ║
 ╚══════════════════════════════════════════════════════════════╝
 
-📅 Дата: {results['timestamp']}
-🎯 Тема: {results['topic']}
-🤖 Платформа: LangChain 1.0 + OpenAI GPT-4
+Дата: {results['timestamp']}
+Тема: {results['topic']}
+Платформа: LangChain 1.0 + OpenAI GPT-4
 
 ════════════════════════════════════════════════════════════════
 
-📌 РЕЗУЛЬТАТИ ПОШУКУ:
+РЕЗУЛЬТАТИ ПОШУКУ:
 {results.get('search', 'Немає даних')}
 
 ════════════════════════════════════════════════════════════════
 
-📊 СТАТИСТИЧНИЙ АНАЛІЗ:
+СТАТИСТИЧНИЙ АНАЛІЗ:
 {results.get('analysis', 'Немає даних')}
 
 ════════════════════════════════════════════════════════════════
 
-🤖 AI АНАЛІТИКА:
+AI АНАЛІТИКА:
 {results.get('ai_analysis', 'Немає даних')}
 
 ════════════════════════════════════════════════════════════════
 
-✅ Дослідження завершено успішно
+Дослідження завершено успішно
 """
 
 # ===========================
@@ -290,37 +289,37 @@ def main():
     
     print("""
 ╔══════════════════════════════════════════════════════════════╗
-║            LANGCHAIN 1.0 RESEARCH AGENT                       ║
-║                Найновіші версії пакетів                       ║
+║            LANGCHAIN 1.0 RESEARCH AGENT                      ║
+║                Найновіші версії пакеті                       ║
 ╚══════════════════════════════════════════════════════════════╝
     """)
     
     # Перевірка версій
-    print("📦 Версії пакетів:")
+    print("Версії пакетів:")
     try:
         import langchain
-        print(f"   ✅ LangChain: {langchain.__version__}")
+        print(f"   LangChain: {langchain.__version__}")
     except:
-        print(f"   ❌ LangChain: не встановлено")
+        print(f"   LangChain: не встановлено")
     
     try:
         import langchain_openai
-        print(f"   ✅ LangChain-OpenAI: встановлено")
+        print(f"   LangChain-OpenAI: встановлено")
     except:
-        print(f"   ❌ LangChain-OpenAI: не встановлено")
+        print(f"   LangChain-OpenAI: не встановлено")
     
     try:
         import openai
-        print(f"   ✅ OpenAI: {openai.__version__}")
+        print(f"   OpenAI: {openai.__version__}")
     except:
-        print(f"   ❌ OpenAI: не встановлено")
+        print(f"   OpenAI: не встановлено")
     
     # API ключ
     api_key = os.getenv("OPENAI_API_KEY")
     if api_key:
-        print(f"   ✅ API ключ: {api_key[:10]}...{api_key[-4:]}")
+        print(f"   API ключ: {api_key[:10]}...{api_key[-4:]}")
     else:
-        print(f"   ⚠️ API ключ: не знайдено (демо режим)")
+        print(f"   API ключ: не знайдено (демо режим)")
     
     print("\n" + "=" * 60)
     
@@ -335,7 +334,7 @@ def main():
     print("\n" + "=" * 60)
     print(result["report"])
     
-    print("\n✅ Готово! Перегляньте файли:")
+    print("\nГотово! Перегляньте файли:")
     print("   • langchain1_report.json - повні дані")
     print("   • langchain1_memory.json - збережена історія")
 
@@ -343,8 +342,8 @@ if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n👋 Програму перервано")
+        print("\n\nПрограму перервано")
     except Exception as e:
-        print(f"\n❌ Критична помилка: {e}")
+        print(f"\nКритична помилка: {e}")
         import traceback
         traceback.print_exc()
