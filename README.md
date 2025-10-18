@@ -4,7 +4,7 @@
 
 Навчитись створювати AI-агентів від простого до складного.
 
-## 📚 Структура навчання (три фреймворки)
+## 📚 Структура навчання (чотири фреймворки)
 
 ### 🟢 **Фреймворк 1: LangChain** (~350 рядків)
 ```bash
@@ -15,27 +15,40 @@ python3 examples/01_langchain_v1.py
 - **Інструменти**: Web search, data analysis, AI processing
 - **Код**: 349 рядків з детальними коментарями
 
-### 🟡 **Фреймворк 2: CrewAI** (~300 рядків)
+### 🔵 **Фреймворк 2: LangChain + LangGraph** (~400 рядків)
+```bash
+python3 examples/02_langchain_langgraph.py
+```
+- **Що вивчаємо**: LangGraph StateGraph, мультиагентна оркестрація
+- **Особливості**: State machine, граф агентів, послідовне виконання
+- **Агенти**: Researcher → Analyst → Reporter
+- **Код**: ~400 рядків, професійна архітектура
+
+### 🟡 **Фреймворк 3: CrewAI** (~300 рядків)
 ```bash
 # Простий приклад
-python3 examples/02_crewai_simple.py
+python3 examples/03_crewai_simple.py
 
 # Мультиагентна система
-python3 examples/02_crewai_agent.py
+python3 examples/04_crewai_agents.py
 ```
 - **Що вивчаємо**: Мультиагентні системи, командна робота
 - **Особливості**: Агенти з ролями, задачі з контекстом
 - **Інструменти**: Custom tools через @tool декоратор
 - **Код**: 323/294 рядки, два приклади
 
-### 🔴 **Фреймворк 3: SmolAgents** (~270 рядків)
+### 🔴 **Фреймворк 4: SmolAgents** (~270 рядків)
 ```bash
-python3 examples/03_smolagents_agent.py
+# Одиночний агент
+python3 examples/05_smolagents_agent.py
+
+# Мультиагентна система (два підходи)
+python3 examples/06_smolagents_multiagent.py
 ```
-- **Що вивчаємо**: Code-first підхід, CodeAgent
-- **Особливості**: Генерація Python коду для задач
-- **Інструменти**: Підтримка OpenAI, HuggingFace, локальних моделей
-- **Код**: 267 рядків, мінімалістичний стиль
+- **Що вивчаємо**: Code-first підхід, CodeAgent, мультиагентність
+- **Особливості**: Генерація Python коду, два підходи до оркестрації
+- **Підходи**: Sequential (1 агент) vs Multi-Agent (3 агенти)
+- **Код**: 267 (single) / ~550 (multi-agent) рядків
 
 ## 🚀 Швидкий старт для студентів
 
@@ -138,11 +151,84 @@ class LangChain1Agent:
 
 ---
 
+### Архітектура LangChain + LangGraph
+
+**Ключові концепції**: StateGraph, агентна оркестрація, state machine
+
+```python
+from langgraph.graph import StateGraph, END
+from typing import TypedDict, Annotated
+import operator
+
+# Визначення стану
+class AgentState(TypedDict):
+    topic: str
+    research_results: str
+    analysis_results: str
+    final_report: str
+    messages: Annotated[List[str], operator.add]
+
+# Агент-вузол 1: Дослідник
+def researcher_node(state: AgentState) -> AgentState:
+    search_results = search_web(state["topic"])
+    return {
+        "research_results": search_results,
+        "messages": ["✅ Researcher завершив"]
+    }
+
+# Агент-вузол 2: Аналітик
+def analyst_node(state: AgentState) -> AgentState:
+    analysis = analyze_data(state["research_results"])
+    return {
+        "analysis_results": analysis,
+        "messages": ["✅ Analyst завершив"]
+    }
+
+# Агент-вузол 3: Репортер
+def reporter_node(state: AgentState) -> AgentState:
+    report = generate_report(
+        state["research_results"],
+        state["analysis_results"]
+    )
+    return {
+        "final_report": report,
+        "messages": ["✅ Reporter завершив"]
+    }
+
+# Створення графу
+workflow = StateGraph(AgentState)
+workflow.add_node("researcher", researcher_node)
+workflow.add_node("analyst", analyst_node)
+workflow.add_node("reporter", reporter_node)
+
+# Визначення послідовності
+workflow.set_entry_point("researcher")
+workflow.add_edge("researcher", "analyst")
+workflow.add_edge("analyst", "reporter")
+workflow.add_edge("reporter", END)
+
+# Компіляція та запуск
+app = workflow.compile()
+result = app.invoke(initial_state)
+```
+
+**Виходи**: `langgraph_report_*.json`
+
+**Pipeline**: StateGraph → Node Execution → State Updates → Final State
+
+**Переваги**:
+- Чіткий граф виконання
+- Передача стану між агентами
+- Можливість візуалізації графу
+- Легка модифікація послідовності
+
+---
+
 ### Архітектура CrewAI
 
 **Ключові концепції**: Agents з ролями, Tasks з контекстом, Crew з Process
 
-#### Простий агент (02_crewai_simple.py)
+#### Простий агент (03_crewai_simple.py)
 
 ```python
 # Інструменти через декоратор
@@ -173,7 +259,7 @@ crew = Crew(agents=[agent], tasks=[task])
 result = crew.kickoff()
 ```
 
-#### Мультиагентна система (02_crewai_agent.py)
+#### Мультиагентна система (04_crewai_agents.py)
 
 ```python
 # Три агенти з різними ролями
@@ -249,15 +335,17 @@ result = agent.run(task)
 
 ## 📊 Порівняння фреймворків
 
-| Характеристика | LangChain | CrewAI | SmolAgents |
-|----------------|-----------|---------|------------|
-| **Підхід** | Chains & Pipelines | Multi-Agent Teams | Code Generation |
-| **Складність** | Середня | Висока | Низька |
-| **Інструменти** | Функції в dict | @tool декоратор | @tool з docstrings |
-| **Паралелізм** | Через LCEL | Process.sequential/hierarchical | Послідовно |
-| **Контекст** | Через chains | context між tasks | Через generated code |
-| **LLM підтримка** | OpenAI, Anthropic | OpenAI | OpenAI, HF, Local |
-| **Use case** | Pipelines, RAG | Командна робота | Швидкі прототипи |
+| Характеристика | LangChain | LangGraph | CrewAI | SmolAgents |
+|----------------|-----------|-----------|---------|------------|
+| **Підхід** | Chains & Pipelines | State Graph | Multi-Agent Teams | Code Generation |
+| **Складність** | Середня | Середня-Висока | Висока | Низька |
+| **Інструменти** | Функції в dict | Функції | @tool декоратор | @tool з docstrings |
+| **Мультиагентність** | Ні | Так | Так | Ні |
+| **Оркестрація** | LCEL chains | StateGraph + Edges | Crew + Process | CodeAgent |
+| **Контекст** | Через chains | State між nodes | context між tasks | Через generated code |
+| **Візуалізація** | Ні | Так (граф) | Ні | Ні |
+| **LLM підтримка** | OpenAI, Anthropic | Всі LangChain | OpenAI | OpenAI, HF, Local |
+| **Use case** | Pipelines, RAG | Складні workflow | Командна робота | Швидкі прототипи |
 
 ---
 
@@ -269,23 +357,35 @@ python3 examples/01_langchain_v1.py
 ```
 Демонструє LCEL chains та pipeline pattern для дослідження.
 
+### LangChain + LangGraph Multi-Agent
+```bash
+python3 examples/02_langchain_langgraph.py
+```
+Мультиагентна система з StateGraph. Три агенти (Researcher → Analyst → Reporter) з передачею стану.
+
 ### CrewAI Simple Agent
 ```bash
-python3 examples/02_crewai_simple.py
+python3 examples/03_crewai_simple.py
 ```
 Один агент з кількома інструментами та Task.
 
 ### CrewAI Multi-Agent
 ```bash
-python3 examples/02_crewai_agent.py
+python3 examples/04_crewai_agents.py
 ```
-Команда з 3 агентів (researcher → analyst → reporter) з context sharing.
+Команда з 3 агентів (researcher → analyst → reporter) з context sharing через CrewAI Process.
 
-### SmolAgents
+### SmolAgents Single Agent
 ```bash
-python3 examples/03_smolagents_agent.py
+python3 examples/05_smolagents_agent.py
 ```
 CodeAgent генерує Python код для виконання дослідження.
+
+### SmolAgents Multi-Agent
+```bash
+python3 examples/06_smolagents_multiagent.py
+```
+Два підходи до мультиагентності: Sequential (1 агент, 3 етапи) vs Multi-Agent (3 окремі агенти).
 
 ## 🛠 Версії та сумісність
 
@@ -293,6 +393,7 @@ CodeAgent генерує Python код для виконання дослідж�
 |-------|--------|-------------|
 | Python | 3.10+ | ✅ |
 | LangChain | 1.0.0 | ✅ |
+| LangGraph | 0.2.0+ | ✅ |
 | OpenAI | 1.109+ | ✅ |
 | CrewAI | 0.203+ | ⚪ |
 | SmolAgents | 1.22+ | ⚪ |
@@ -300,7 +401,13 @@ CodeAgent генерує Python код для виконання дослідж�
 ## ❓ Часті питання
 
 ### Який файл запускати першим?
-Спочатку запустіть `test_agents.py` або `bash quick_start.sh` для автоматичного тестування всіх агентів. Потім вивчайте файли в порядку: `01_langchain_v1.py` → `02_crewai_simple.py` → `02_crewai_agent.py` → `03_smolagents_agent.py`
+Спочатку запустіть `test_agents.py` або `bash quick_start.sh` для автоматичного тестування всіх агентів. Потім вивчайте файли в порядку:
+1. `01_langchain_v1.py` - базовий LangChain LCEL
+2. `02_langchain_langgraph.py` - LangGraph StateGraph
+3. `03_crewai_simple.py` - простий CrewAI
+4. `04_crewai_agents.py` - CrewAI команда
+5. `05_smolagents_agent.py` - SmolAgents одиночний
+6. `06_smolagents_multiagent.py` - SmolAgents мультиагентний
 
 
 ### Де взяти API ключ?

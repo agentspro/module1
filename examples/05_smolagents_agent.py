@@ -193,7 +193,7 @@ class SmolAgentsResearchAgent:
     
     def research(self, topic: str) -> Dict[str, Any]:
         """Виконати дослідження на задану тему"""
-        print(f"\n🔬 SmolAgents: Починаю дослідження теми '{topic}'")
+        print(f"\nSmolAgents: Починаю дослідження теми '{topic}'")
         print("=" * 60)
         
         # Формування задачі для агента
@@ -237,13 +237,13 @@ def main():
     
     research_topic = "Штучний інтелект в освіті 2025"
     
-    print("\n🔬 SMOLAGENTS DEMO")
+    print("\nSMOLAGENTS DEMO")
     print("=" * 60)
     
     agent = SmolAgentsResearchAgent(model_type="openai")
     result = agent.research(research_topic)
     
-    print(f"\n📄 Результат:")
+    print(f"\nРезультат:")
     print(f"Тема: {result['topic']}")
     print(f"Тип агента: {result.get('agent_type', 'N/A')}")
     print(f"Результат: {result.get('result', 'Немає результату')[:300]}...")
@@ -255,7 +255,7 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as e:
-        print(f"❌ Помилка: {e}")
+        print(f"[ERROR] Помилка: {e}")
         print("\nПереконайтеся, що:")
         print("1. Встановлено smolagents: pip install smolagents")
         print("2. Налаштовано API ключі або локальну модель")
