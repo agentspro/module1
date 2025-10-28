@@ -338,14 +338,14 @@ result = agent.run(task)
 | Характеристика | LangChain | LangGraph | CrewAI | SmolAgents |
 |----------------|-----------|-----------|---------|------------|
 | **Підхід** | Chains & Pipelines | State Graph | Multi-Agent Teams | Code Generation |
-| **Складність** | Середня | Середня-Висока | Висока | Низька |
-| **Інструменти** | Функції в dict | Функції | @tool декоратор | @tool з docstrings |
-| **Мультиагентність** | Ні | Так | Так | Ні |
+| **Складність** | Середня | Середня-Висока | Низька-Середня | Низька |
+| **Інструменти** | @tool або StructuredTool | @tool + functions | @tool декоратор | @tool з docstrings |
+| **Мультиагентність** | Опосередковано | Так | Так | Ні |
 | **Оркестрація** | LCEL chains | StateGraph + Edges | Crew + Process | CodeAgent |
-| **Контекст** | Через chains | State між nodes | context між tasks | Через generated code |
-| **Візуалізація** | Ні | Так (граф) | Ні | Ні |
-| **LLM підтримка** | OpenAI, Anthropic | Всі LangChain | OpenAI | OpenAI, HF, Local |
-| **Use case** | Pipelines, RAG | Складні workflow | Командна робота | Швидкі прототипи |
+| **Контекст** | Через chains | State між nodes | Shared context + memory | Через generated code |
+| **Візуалізація** | LangSmith (окремо) | Так (граф) | Kickoff результати | Ні |
+| **LLM підтримка** | 100+ провайдерів | Всі LangChain | Всі LangChain LLMs | OpenAI, HF, Local |
+| **Use case** | Pipelines, RAG | Складні workflow | Командна робота агентів | Швидкі прототипи |
 
 ---
 
