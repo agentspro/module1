@@ -1,6 +1,6 @@
 """
 CrewAI Agent БЕЗ LangChain залежностей
-Чистий CrewAI для студентів - простіше і зрозуміліше
+Чистий CrewAI 
 """
 
 import os
@@ -16,8 +16,7 @@ from crewai.tools import tool
 
 class SimpleCrewAIAgent:
     """
-    Чистий CrewAI агент без LangChain
-    Використовує вбудовані можливості CrewAI
+    Чистий CrewAI використовує вбудовані можливості CrewAI
     """
     
     def __init__(self):
