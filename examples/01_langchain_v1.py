@@ -1,7 +1,7 @@
 """
 Модуль 1: AI Research Agent на LangChain 1.0
-Використовує найновіші версії всіх пакетів
 """
+# -*- coding: utf-8 -*-
 
 import os
 import sys
@@ -19,6 +19,7 @@ except:
 
 # Імпорти для LangChain 1.0
 try:
+    # from langchain.chat_models import ChatOpenAI
     from langchain_openai import ChatOpenAI
     from langchain_core.output_parsers import StrOutputParser
     from langchain_core.prompts import ChatPromptTemplate
@@ -70,7 +71,7 @@ class LangChain1Agent:
         def search_web(query: str) -> str:
             """Пошук інформації в інтернеті"""
             try:
-                from ddgs import DDGS
+                from duckduckgo_search import DDGS
                 with DDGS() as ddgs:
                     results = list(ddgs.text(query, max_results=3))
                     if results:
@@ -310,16 +311,18 @@ def main():
     
     try:
         import openai
+        version = getattr(openai, '__version__', 'версія невідома')
+        print(f"   OpenAI: {version}")
         print(f"   OpenAI: {openai.__version__}")
     except:
         print(f"   OpenAI: не встановлено")
     
-    # API ключ
+    # считуємо API ключ
     api_key = os.getenv("OPENAI_API_KEY")
     if api_key:
-        print(f"   API ключ: {api_key[:10]}...{api_key[-4:]}")
+        print(f"   API ключ: api_key")
     else:
-        print(f"   API ключ: не знайдено (демо режим)")
+        print(f"   API ключ: не знайдено")
     
     print("\n" + "=" * 60)
     
