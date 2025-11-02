@@ -5,7 +5,8 @@
 
 import os
 from typing import Dict, List, Any, Optional
-from smolagents import CodeAgent, tool, HfApiModel, OpenAIServerModel
+from smolagents import CodeAgent, tool, InferenceClientModel, OpenAIServerModel
+from smolagents.monitoring import LogLevel
 from datetime import datetime
 import json
 import requests
@@ -13,6 +14,13 @@ import requests
 # ===========================
 # БАЗОВИЙ АГЕНТ-ДОСЛІДНИК
 # ===========================
+
+# Завантажуємо змінні середовища з .env файлу
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv не обов'язковий, можна використовувати системні змінні
 
 class SmolAgentsResearchAgent:
     """
@@ -39,12 +47,12 @@ class SmolAgentsResearchAgent:
         if model_type == "openai":
             # Використання OpenAI через сервер API
             return OpenAIServerModel(
-                model_id="gpt-4",
+                model_id="gpt-5-nano",
                 api_key=api_key or os.getenv("OPENAI_API_KEY")
             )
         elif model_type == "hf":
             # Використання моделі з Hugging Face Hub
-            return HfApiModel(
+            return InferenceClientModel(
                 model_id="meta-llama/Llama-3.3-70B-Instruct",
                 token=os.getenv("HF_TOKEN")
             )
@@ -183,10 +191,10 @@ class SmolAgentsResearchAgent:
             tools=self.tools,
             model=self.model,
             max_steps=5,
-            verbose=True,
-            system_prompt="""Ви - професійний агент-дослідник. 
+            instructions="""Ви - професійний агент-дослідник. 
             Використовуйте доступні інструменти для збору та аналізу інформації.
-            Завжди перевіряйте факти та надавайте структуровані висновки."""
+            Завжди перевіряйте факти та надавайте структуровані висновки.""",
+            verbosity_level=LogLevel.DEBUG
         )
         
         return agent

@@ -39,17 +39,17 @@ class SimpleCrewAIAgent:
                 "Приклад: export OPENAI_API_KEY='sk-...' або створіть .env з рядком OPENAI_API_KEY=sk-..."
             )
         
-        # CrewAI автоматично використає OPENAI_API_KEY з середовища
+
         self.llm = self._create_llm(api_key)
         self.tools = self._create_tools()
         self.agent = self._create_agent()
     
-    def _create_llm(self, api_key: str) -> LLM:
+    def _create_llm(self, api_key: str, model: str = "gpt-5-nano", temperature: float = 1) -> LLM:
         """Створення LLM"""
         return LLM(
-            model="gpt-5-nano",
+            model=model,
             api_key=api_key,
-            temperature=1
+            temperature=temperature
         )
     
     def _create_tools(self) -> List:
@@ -219,12 +219,12 @@ class MultiAgentTeam:
         self.analyst = self._create_analyst()
         self.writer = self._create_writer()
 
-    def _create_llm(self, api_key: str) -> LLM:
+    def _create_llm(self, api_key: str, model: str = "gpt-5-nano", temperature: float = 1) -> LLM:
         """Створення LLM"""
         return LLM(
-            model="gpt-5-nano",
+            model=model,
             api_key=api_key,
-            temperature=1
+            temperature=temperature
         )
     
     def _create_tools(self) -> List:

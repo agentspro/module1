@@ -119,7 +119,7 @@ class SimpleAgent:
 # Структура
 class LangChain1Agent:
     def __init__(self):
-        self.llm = ChatOpenAI(model="gpt-4")
+        self.llm = ChatOpenAI(model="gpt-5-nano")
         self.tools = {
             "search_web": function,
             "analyze_data": function,
@@ -310,7 +310,7 @@ def search_web(query: str) -> str:
 # Агент з моделлю
 agent = CodeAgent(
     tools=[search_web, analyze_sentiment, save_memory],
-    model=OpenAIServerModel(model_id="gpt-4"),
+    model=OpenAIServerModel(model_id="gpt-5-nano"),
     max_steps=5,
     verbose=True
 )
