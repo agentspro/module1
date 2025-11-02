@@ -53,3 +53,7 @@ temp/
 *.key
 *.pem
 secrets/
+
+# Project Results
+*.json
+*.docx

@@ -8,15 +8,15 @@ import os
 import json
 from datetime import datetime
 from typing import Dict, List, Any
-from smolagents import CodeAgent, tool, HfApiModel, OpenAIServerModel
+from smolagents import CodeAgent, tool, InferenceClientModel, OpenAIServerModel
+from smolagents.monitoring import LogLevel
 
-# Завантаження .env
+# Завантажуємо змінні середовища з .env файлу
 try:
     from dotenv import load_dotenv
     load_dotenv()
-    print("[OK] .env файл завантажено")
-except:
-    print("[WARNING] python-dotenv не встановлено")
+except ImportError:
+    pass  # dotenv не обов'язковий, можна використовувати системні змінні
 
 # ===========================
 # ІНСТРУМЕНТИ ДЛЯ АГЕНТІВ
@@ -151,12 +151,12 @@ class SmolAgentsMultiAgentSystem:
             try:
                 if model_type == "openai":
                     self.model = OpenAIServerModel(
-                        model_id="gpt-4",
+                        model_id="gpt-5-nano",
                         api_key=self.api_key
                     )
                     print("[OK] OpenAI модель створено")
                 elif model_type == "hf":
-                    self.model = HfApiModel(
+                    self.model = InferenceClientModel(
                         model_id="meta-llama/Llama-3.3-70B-Instruct",
                         token=os.getenv("HF_TOKEN")
                     )
@@ -182,13 +182,13 @@ class SmolAgentsMultiAgentSystem:
             tools=self.tools,
             model=self.model,
             max_steps=5,
-            verbose=True,
-            system_prompt="""Ви - професійний дослідник з 15-річним стажем.
+            instructions="""Ви - професійний дослідник з 15-річним стажем.
             Спеціалізуєтесь на освітніх технологіях та штучному інтелекті.
             Ваша задача - знайти найактуальнішу інформацію.
 
             Використовуйте search_web для пошуку інформації.
-            Зберігайте результати через save_memory."""
+            Зберігайте результати через save_memory.""",
+            verbosity_level=LogLevel.DEBUG
         )
 
     def _create_analyst(self):
@@ -200,13 +200,13 @@ class SmolAgentsMultiAgentSystem:
             tools=self.tools,
             model=self.model,
             max_steps=5,
-            verbose=True,
-            system_prompt="""Ви - експерт з data science та аналізу трендів.
+            instructions="""Ви - експерт з data science та аналізу трендів.
             Маєте унікальну здатність знаходити приховані патерни в даних.
             Ваша задача - проаналізувати зібрану інформацію.
 
             Використовуйте analyze_text для аналізу даних.
-            Виявляйте ключові інсайти та тренди."""
+            Виявляйте ключові інсайти та тренди.""",
+            verbosity_level=LogLevel.DEBUG
         )
 
     def _create_reporter(self):
@@ -218,12 +218,12 @@ class SmolAgentsMultiAgentSystem:
             tools=self.tools,
             model=self.model,
             max_steps=5,
-            verbose=True,
-            system_prompt="""Ви - професійний технічний письменник.
+            instructions="""Ви - професійний технічний письменник.
             Вмієте перетворювати складні технічні дані на зрозумілі звіти.
             Ваша задача - створити структурований звіт.
 
-            Створюйте чіткі, зрозумілі звіти для широкої аудиторії."""
+            Створюйте чіткі, зрозумілі звіти для широкої аудиторії.""",
+            verbosity_level=LogLevel.DEBUG
         )
 
     def run_sequential(self, topic: str) -> Dict[str, Any]:
@@ -247,12 +247,12 @@ class SmolAgentsMultiAgentSystem:
             tools=self.tools,
             model=self.model,
             max_steps=15,
-            verbose=True,
-            system_prompt="""Ви - універсальний AI агент з трьома ролями.
+            instructions="""Ви - універсальний AI агент з трьома ролями.
             Виконуйте задачу в три етапи:
             1. RESEARCHER: Знайдіть інформацію
             2. ANALYST: Проаналізуйте дані
-            3. REPORTER: Створіть звіт"""
+            3. REPORTER: Створіть звіт""",
+            verbosity_level=LogLevel.DEBUG
         )
 
         # Формуємо комплексну задачу

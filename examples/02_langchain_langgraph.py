@@ -134,7 +134,7 @@ class MultiAgentSystem:
         else:
             try:
                 self.llm = ChatOpenAI(
-                    model="gpt-4",
+                    model="gpt-5-nano",
                     temperature=0.7,
                     api_key=self.api_key
                 )

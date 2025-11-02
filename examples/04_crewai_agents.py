@@ -3,14 +3,18 @@ CrewAI Multi-Agent System
 Демонстрація роботи команди агентів
 """
 
+import os
 import json
 from datetime import datetime
-from crewai import Agent, Task, Crew, Process
+from crewai import Agent, Task, Crew, Process, LLM
 from crewai.tools import tool
 
-# Завантажуємо змінні середовища
-from dotenv import load_dotenv
-load_dotenv()
+# Завантажуємо змінні середовища з .env файлу
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass  # dotenv не обов'язковий, можна використовувати системні змінні
 
 # ===========================
 # ІНСТРУМЕНТИ ДЛЯ АГЕНТІВ
@@ -94,9 +98,30 @@ def generate_report(data: str, filename: str = None) -> str:
 # СТВОРЕННЯ АГЕНТІВ
 # ===========================
 
-def create_research_team():
+def _create_llm(api_key: str, model: str = "gpt-5-nano", temperature: float = 1) -> LLM:
+    """Створення LLM з вибраною моделлю"""
+    return LLM(
+        model=model,
+        api_key=api_key,
+        temperature=temperature
+    )
+
+def create_research_team(api_key: str = None, model: str = "gpt-5-nano", temperature: float = 1):
     """Створення команди агентів для дослідження"""
     
+    # Перевірка API ключа
+    api_key = api_key or os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        raise ValueError(
+            "OPENAI_API_KEY не знайдено! "
+            "Додайте ключ до .env файлу або експортуйте змінну середовища. "
+            "Приклад: export OPENAI_API_KEY='sk-...' або створіть .env з рядком OPENAI_API_KEY=sk-..."
+        )
+    
+    # Створюємо LLM
+    llm = _create_llm(api_key, model, temperature)
+
+
     # Агент 1: Дослідник
     researcher = Agent(
         role='Головний Дослідник',
@@ -105,6 +130,7 @@ def create_research_team():
         Спеціалізуєтесь на освітніх технологіях та штучному інтелекті.
         Ваша сильна сторона - знаходження найсвіжіших даних та трендів.""",
         tools=[search_web],
+        llm=llm,
         verbose=True,
         max_iter=3
     )
@@ -117,6 +143,7 @@ def create_research_team():
         Маєте унікальну здатність знаходити приховані патерни в даних.
         Ваші аналітичні звіти завжди точні та корисні.""",
         tools=[analyze_data],
+        llm=llm,
         verbose=True,
         max_iter=3
     )
@@ -129,6 +156,7 @@ def create_research_team():
         Вмієте перетворювати складні технічні дані на зрозумілі звіти.
         Ваші звіти читають і технічні спеціалісти, і звичайні користувачі.""",
         tools=[generate_report],
+        llm=llm,
         verbose=True,
         max_iter=2
     )
@@ -208,6 +236,21 @@ def main():
     ============================================================
     """)
     
+    # Перевірка API ключа
+    api_key = os.getenv("OPENAI_API_KEY")
+    if api_key:
+        print(f"[OK] API ключ знайдено")
+    else:
+        print("[ERROR] OPENAI_API_KEY не знайдено!")
+        print("\nВаріанти рішення:")
+        print("1. Створіть .env файл в корені проекту з рядком:")
+        print("   OPENAI_API_KEY=sk-your-key-here")
+        print("\n2. Або експортуйте змінну середовища:")
+        print("   export OPENAI_API_KEY='sk-your-key-here'")
+        print("\n3. Або встановіть в Python коді:")
+        print("   os.environ['OPENAI_API_KEY'] = 'sk-your-key-here'")
+        return
+    
     # Тема дослідження
     topic = "Штучний інтелект в освіті України 2025: можливості та виклики"
     
@@ -282,6 +325,7 @@ def main():
     print("- Додайте нові інструменти через @tool декоратор")
     print("- Спробуйте Process.hierarchical для ієрархічної роботи")
     print("- Експериментуйте з context між задачами")
+    print("- Змініть модель LLM в create_research_team(model='gpt-4-turbo')")
 
 if __name__ == "__main__":
     try:
