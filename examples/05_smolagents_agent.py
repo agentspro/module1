@@ -42,7 +42,7 @@ class SmolAgentsResearchAgent:
                 model_id="gpt-4",
                 api_key=api_key or os.getenv("OPENAI_API_KEY")
             )
-        else model_type == "hf":
+        elif model_type == "hf":
             # Використання моделі з Hugging Face Hub
             return HfApiModel(
                 model_id="meta-llama/Llama-3.3-70B-Instruct",
