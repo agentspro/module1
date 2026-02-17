@@ -182,11 +182,11 @@ class MultiAgentSystem:
                 prompt = ChatPromptTemplate.from_messages([
                     ("system", """Ви - професійний дослідник AI в освіті.
                     Проаналізуйте знайдену інформацію та виділіть 5 ключових фактів."""),
-                    ("human", f"Тема: {topic}\n\nДані:\n{search_results}")
+                    ("human", "Тема: {topic}\n\nДані:\n{data}")
                 ])
 
                 chain = prompt | self.llm | StrOutputParser()
-                ai_summary = chain.invoke({})
+                ai_summary = chain.invoke({"topic": topic, "data": search_results})
                 search_results = f"{search_results}\n\nAI Висновки:\n{ai_summary}"
             except Exception as e:
                 print(f"[WARNING] AI обробка недоступна: {e}")
@@ -214,11 +214,11 @@ class MultiAgentSystem:
                 prompt = ChatPromptTemplate.from_messages([
                     ("system", """Ви - експерт з data science та аналізу трендів.
                     Проаналізуйте дані та виявіть ключові інсайти, тренди та закономірності."""),
-                    ("human", f"Дані для аналізу:\n{research_results}")
+                    ("human", "Дані для аналізу:\n{data}")
                 ])
 
                 chain = prompt | self.llm | StrOutputParser()
-                deep_analysis = chain.invoke({})
+                deep_analysis = chain.invoke({"data": research_results})
                 analysis = f"{analysis}\n\nГлибокий аналіз:\n{deep_analysis}"
             except Exception as e:
                 print(f"[WARNING] AI аналіз недоступний: {e}")
@@ -276,11 +276,11 @@ class MultiAgentSystem:
                 prompt = ChatPromptTemplate.from_messages([
                     ("system", """Ви - професійний технічний письменник.
                     Створіть executive summary та рекомендації на основі дослідження та аналізу."""),
-                    ("human", f"Дослідження:\n{research_results}\n\nАналіз:\n{analysis_results}")
+                    ("human", "Дослідження:\n{research}\n\nАналіз:\n{analysis}")
                 ])
 
                 chain = prompt | self.llm | StrOutputParser()
-                summary = chain.invoke({})
+                summary = chain.invoke({"research": research_results, "analysis": analysis_results})
                 report += f"""
 ════════════════════════════════════════════════════════════════
 EXECUTIVE SUMMARY (Reporter Agent)

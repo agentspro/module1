@@ -8,7 +8,9 @@ echo ""
 # Перевірка та завантаження .env
 if [ -f .env ]; then
     echo "📁 Знайдено .env файл, завантажую змінні..."
-    export $(cat .env | grep -v '^#' | xargs)
+    set -a
+    source .env
+    set +a
     echo "✅ Змінні середовища завантажено"
     
     # Перевірка API ключа

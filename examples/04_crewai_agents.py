@@ -9,8 +9,11 @@ from crewai import Agent, Task, Crew, Process
 from crewai.tools import tool
 
 # Завантажуємо змінні середовища
-from dotenv import load_dotenv
-load_dotenv()
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
 
 # ===========================
 # ІНСТРУМЕНТИ ДЛЯ АГЕНТІВ

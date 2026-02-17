@@ -308,13 +308,20 @@ class MultiAgentTeam:
         )
         
         # Запускаємо
-        result = crew.kickoff()
-        
-        return {
-            "topic": topic,
-            "team_result": str(result),
-            "agents_used": 3
-        }
+        try:
+            result = crew.kickoff()
+
+            return {
+                "topic": topic,
+                "team_result": str(result),
+                "agents_used": 3
+            }
+        except Exception as e:
+            return {
+                "topic": topic,
+                "error": str(e),
+                "agents_used": 3
+            }
 
 # ===========================
 # ГОЛОВНА ПРОГРАМА

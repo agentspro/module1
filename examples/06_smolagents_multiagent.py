@@ -8,7 +8,7 @@ import os
 import json
 from datetime import datetime
 from typing import Dict, List, Any
-from smolagents import CodeAgent, tool, HfApiModel, OpenAIServerModel
+from smolagents import CodeAgent, tool, InferenceClientModel, OpenAIServerModel
 
 # Завантаження .env
 try:
@@ -156,7 +156,7 @@ class SmolAgentsMultiAgentSystem:
                     )
                     print("[OK] OpenAI модель створено")
                 elif model_type == "hf":
-                    self.model = HfApiModel(
+                    self.model = InferenceClientModel(
                         model_id="meta-llama/Llama-3.3-70B-Instruct",
                         token=os.getenv("HF_TOKEN")
                     )
@@ -182,8 +182,7 @@ class SmolAgentsMultiAgentSystem:
             tools=self.tools,
             model=self.model,
             max_steps=5,
-            verbose=True,
-            system_prompt="""Ви - професійний дослідник з 15-річним стажем.
+            instructions="""Ви - професійний дослідник з 15-річним стажем.
             Спеціалізуєтесь на освітніх технологіях та штучному інтелекті.
             Ваша задача - знайти найактуальнішу інформацію.
 
@@ -200,8 +199,7 @@ class SmolAgentsMultiAgentSystem:
             tools=self.tools,
             model=self.model,
             max_steps=5,
-            verbose=True,
-            system_prompt="""Ви - експерт з data science та аналізу трендів.
+            instructions="""Ви - експерт з data science та аналізу трендів.
             Маєте унікальну здатність знаходити приховані патерни в даних.
             Ваша задача - проаналізувати зібрану інформацію.
 
@@ -218,8 +216,7 @@ class SmolAgentsMultiAgentSystem:
             tools=self.tools,
             model=self.model,
             max_steps=5,
-            verbose=True,
-            system_prompt="""Ви - професійний технічний письменник.
+            instructions="""Ви - професійний технічний письменник.
             Вмієте перетворювати складні технічні дані на зрозумілі звіти.
             Ваша задача - створити структурований звіт.
 
@@ -247,8 +244,7 @@ class SmolAgentsMultiAgentSystem:
             tools=self.tools,
             model=self.model,
             max_steps=15,
-            verbose=True,
-            system_prompt="""Ви - універсальний AI агент з трьома ролями.
+            instructions="""Ви - універсальний AI агент з трьома ролями.
             Виконуйте задачу в три етапи:
             1. RESEARCHER: Знайдіть інформацію
             2. ANALYST: Проаналізуйте дані

@@ -71,7 +71,7 @@ class LangChain1Agent:
         def search_web(query: str) -> str:
             """Пошук інформації в інтернеті"""
             try:
-                from duckduckgo_search import DDGS
+                from ddgs import DDGS
                 with DDGS() as ddgs:
                     results = list(ddgs.text(query, max_results=3))
                     if results:
@@ -313,14 +313,13 @@ def main():
         import openai
         version = getattr(openai, '__version__', 'версія невідома')
         print(f"   OpenAI: {version}")
-        print(f"   OpenAI: {openai.__version__}")
     except:
         print(f"   OpenAI: не встановлено")
     
     # считуємо API ключ
     api_key = os.getenv("OPENAI_API_KEY")
     if api_key:
-        print(f"   API ключ: api_key")
+        print(f"   API ключ: {api_key[:7]}...")
     else:
         print(f"   API ключ: не знайдено")
     

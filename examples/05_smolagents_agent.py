@@ -5,10 +5,9 @@
 
 import os
 from typing import Dict, List, Any, Optional
-from smolagents import CodeAgent, tool, HfApiModel, OpenAIServerModel
+from smolagents import CodeAgent, tool, InferenceClientModel, OpenAIServerModel
 from datetime import datetime
 import json
-import requests
 
 # ===========================
 # БАЗОВИЙ АГЕНТ-ДОСЛІДНИК
@@ -44,12 +43,14 @@ class SmolAgentsResearchAgent:
             )
         elif model_type == "hf":
             # Використання моделі з Hugging Face Hub
-            return HfApiModel(
+            return InferenceClientModel(
                 model_id="meta-llama/Llama-3.3-70B-Instruct",
                 token=os.getenv("HF_TOKEN")
             )
+        else:
+            raise ValueError(f"Невідомий model_type: {model_type}. Використовуйте 'openai' або 'hf'.")
 
-    
+
     def _create_tools(self) -> List:
         """Створення набору інструментів для дослідження"""
         
@@ -65,28 +66,14 @@ class SmolAgentsResearchAgent:
                 Результати пошуку
             """
             try:
-                # Спрощений пошук через DuckDuckGo HTML версію
-                url = f"https://duckduckgo.com/html/?q={query}"
-                response = requests.get(url)
-                
-                if response.status_code == 200:
-                    # Простий парсинг результатів
-                    text = response.text
-                    results = []
-                    
-                    # Виділяємо перші кілька результатів
-                    lines = text.split('\n')
-                    for line in lines[:100]:
-                        if 'result__snippet' in line:
-                            # Очищуємо HTML
-                            clean_line = line.strip().replace('<b>', '').replace('</b>', '')
-                            if len(clean_line) > 50:
-                                results.append(clean_line[:200])
-                    
-                    if results:
-                        return "Результати пошуку:\n" + "\n".join(results[:3])
-                
-                return f"Пошук '{query}' виконано (симуляція)"
+                from ddgs import DDGS
+
+                results = []
+                with DDGS() as ddgs:
+                    for r in ddgs.text(query, max_results=3):
+                        results.append(f"- {r['title']}: {r['body'][:150]}...")
+
+                return f"Результати пошуку для '{query}':\n" + "\n".join(results)
             except Exception as e:
                 return f"Помилка пошуку: {e}"
         
@@ -170,7 +157,7 @@ class SmolAgentsResearchAgent:
             with open(memory_file, 'w') as f:
                 json.dump(memory, f, ensure_ascii=False, indent=2)
             
-            return f"Збережено: {key} = {value[:50]}..."
+            return f"Збережено: {key} = {str(value)[:50]}..."
         
         return [search_web, get_current_date, analyze_sentiment, save_memory]
     
@@ -183,8 +170,7 @@ class SmolAgentsResearchAgent:
             tools=self.tools,
             model=self.model,
             max_steps=5,
-            verbose=True,
-            system_prompt="""Ви - професійний агент-дослідник. 
+            instructions="""Ви - професійний агент-дослідник.
             Використовуйте доступні інструменти для збору та аналізу інформації.
             Завжди перевіряйте факти та надавайте структуровані висновки."""
         )
